@@ -12,12 +12,13 @@ class Lectura extends Model
     protected $table = 'lecturas';
 
     protected $fillable = [
-        'id_dispositivo',
+        'dispositivo_id',
         'fecha_hora',
+        'dispositivo_codigo',
     ];
 
     public function dispositivo()
     {
-        return $this->belongsTo(Dispositivo::class, 'id_dispositivo');
+        return $this->belongsTo(Dispositivo::class, 'dispositivo_id');
     }
 }

@@ -21,7 +21,6 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DispositivoController;
 use App\Http\Controllers\LecturaController;
 
-Route::resource('usuarios', UsuarioController::class);
 Route::resource('dispositivos', DispositivoController::class);
 Route::resource('lecturas', LecturaController::class);
 Route::get('/getdivicereads/{id_dispositivo}', [LecturaController::class, 'getDiviseData']);

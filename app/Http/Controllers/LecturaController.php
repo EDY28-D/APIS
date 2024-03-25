@@ -9,47 +9,22 @@ use App\Models\Lectura;
 class LecturaController extends Controller
 {
     // Listar todas las lecturas
-    public function index()
-    {
-        // $lecturas = Lectura::with('Dispositivo')->get();
-        $lecturasFiltradas = Lectura::with('Dispositivo')
-            ->whereHas('Dispositivo', function ($query) {
-                $query->where('usuario_log', 2);
-            })
-            ->get();
+    protected $chainOfResponsibility;
 
-        return response()->json($lecturasFiltradas);
+    public function __construct(ChainOfResponsibility $chainOfResponsibility)
+    {
+        $this->chainOfResponsibility = $chainOfResponsibility;
     }
 
-    // Crear una nueva lectura
     public function store(Request $request)
     {
-        // Validate if the lectura_energia is numeric
-        if (!is_numeric($request->input('lectura_energia'))) {
-            return response()->json(['error' => 'La lectura de energía debe ser un valor numérico.'], 400);
-        }
-
-        // Get the previous reading
-        $dispositivo = Dispositivo::where('codigo', $request->input('id_dispositivo'))->first();
-        
-        $previousReading = Lectura::where('id_dispositivo', $request->input('id_dispositivo'))
-            ->orderBy('fecha_hora', 'desc')
-            ->first();
-
-        // Check if there is a previous reading and compare it with the current one
-        if ($previousReading && $request->input('lectura_energia') < $previousReading->lectura_energia) {
-            return response()->json(['error' => 'La lectura de energía debe ser mayor o igual a la lectura anterior.'], 400);
-        }
-
-
-        // Create a new Lectura instance and save it
-        $lectura = new Lectura();
-        $lectura->id_dispositivo = $request->input('id_dispositivo');
-        $lectura->fecha_hora = $request->input('fecha_hora');
-        $lectura->lectura_energia = $request->input('lectura_energia');
-        $lectura->save();
-
-        return response()->json($lectura, 200);
+        return $this->chainOfResponsibility->store($request);
+    }
+    
+    public function index()
+    {
+        $lecturas = Lectura::all();
+        return response()->json($lecturas);
     }
 
 
@@ -59,44 +34,23 @@ class LecturaController extends Controller
         $lectura = Lectura::findOrFail($id);
         return response()->json($lectura);
     }
-    public function getDiviseData($id_dispositivo)
+    public function getDiviseData($dispositivo_codigo)
     {
-        $divice_reads = Lectura::where('id_dispositivo', $id_dispositivo)->get();
+        $divice_reads = Lectura::where('dispositivo_codigo', $dispositivo_codigo)->get();
         return response()->json($divice_reads);
     }
-    public function getReadsBetweenDate($id, Request $request)
+    public function getReadsBetweenDate($dispositivo_codigo, Request $request)
     {
-        // Obtenemos las fechas de inicio y fin del objeto Request
-        // Obtener la fecha actual
-        $fechaActual = date('Y-m-d');
-
-        // Calcular el primer día del mes actual
+        $fechaActual = date('Y-m-d H:i:s');
         $primerDiaDelMes = date('Y-m-01');
-
-        // Asignar valores a $startDate y $endDate
         $startDate = $request->input('start_date') ?: $primerDiaDelMes;
         $endDate = $request->input('end_date') ?: $fechaActual;
-
-
-        // Filtramos por fecha si se proporcionan las fechas de inicio y fin
-        // $query = Lectura::where('id_dispositivo', $id);
-        // if ($startDate && $endDate) {
-        //     $query->whereBetween('fecha_hora', [$startDate, $endDate]);
-        // }
-        $usuarioLogueadoId = $id;
-        $lecturasFiltradas = Lectura::with('Dispositivo')
-
-            ->whereHas('Dispositivo', function ($query) use ($usuarioLogueadoId, $startDate, $endDate) {
-                $query->where('usuario_log', $usuarioLogueadoId)->whereBetween('fecha_hora', [$startDate, $endDate]);
-            })
-            ->get();
-
-
-        // // Ejecutamos la consulta y obtenemos los registros de lectura
-        // $deviceReads = $query->get();
-
-        // Devolvemos los registros de lectura en formato JSON
-        return response()->json($lecturasFiltradas);
+        $query = Lectura::where('dispositivo_codigo', $dispositivo_codigo);
+        if ($startDate && $endDate) {
+            $query->whereBetween('fecha_hora', [$startDate, $endDate]);
+        }
+         $deviceReads = $query->get();
+        return response()->json($deviceReads);
     }
     // Actualizar una lectura
     public function update(Request $request, $id)
@@ -104,7 +58,6 @@ class LecturaController extends Controller
         $lectura = Lectura::findOrFail($id);
         $lectura->update($request->all());
         return response()->json($lectura, 200);
-        //  return response()->json('Registro actualizado');
     }
 
     // Eliminar una lectura

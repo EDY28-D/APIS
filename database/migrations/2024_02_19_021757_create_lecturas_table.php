@@ -15,11 +15,12 @@ class CreateLecturasTable extends Migration
     {
         Schema::create('lecturas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_dispositivo');
-            $table->foreign('id_dispositivo')->references('id')->on('dispositivos');
+            $table->unsignedBigInteger('dispositivo_id');
+            $table->foreign('dispositivo_id')->references('id')->on('dispositivos');
             $table->dateTime('fecha_hora');
             $table->string('lectura_energia', 50);
             $table->string('lectura_agua', 50);
+            $table->string('dispositivo_codigo', 50)->notNull();
             $table->timestamps();
         });
     }

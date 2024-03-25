@@ -15,12 +15,9 @@ class CreateDispositivosTable extends Migration
     {
         Schema::create('dispositivos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_usuario');
-            $table->foreign('id_usuario')->references('id')->on('usuarios');
-            $table->bigInteger('usuario_log');
+            $table->string('descripcion')->nullable();
             $table->enum('tipo_dispositivo', ['Energía', 'Agua']);
-            $table->string('ubicacion', 255);
-            $table->string('codigo', 255);
+            $table->string('dispositivo_codigo', 255)->unique();
             $table->timestamps();
         });
     }
