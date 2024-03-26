@@ -12,7 +12,7 @@ class Dispositivo extends Model
     protected $table = 'dispositivos';
 
     protected $fillable = [
-        'usuario_id',
+       
         'tipo_dispositivo',
         'dispositivo_codigo',
     ];
