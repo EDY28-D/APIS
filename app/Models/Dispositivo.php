@@ -12,15 +12,16 @@ class Dispositivo extends Model
     protected $table = 'dispositivos';
 
     protected $fillable = [
+<<<<<<< HEAD
        
+=======
+>>>>>>> ae32b943c544804868406b89d3de9b1a85b1d8f6
         'tipo_dispositivo',
         'dispositivo_codigo',
+        'descripcion',
     ];
 
-    public function usuario()
-    {
-        return $this->belongsTo(Usuario::class, 'id_usuario');
-    }
+
     public function lecturas(){
         $this->hasMany(Lectura::class);
     }
