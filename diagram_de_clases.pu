@@ -1,0 +1,87 @@
+@startuml
+
+package "apiseguimientoconsumo" {
+    package "Models" {
+        class Dispositivo {
+            -usuario_id: integer
+            -tipo_dispositivo: string
+            -dispositivo_codigo: string
+            +usuario()
+            +lecturas()
+        }
+
+        class Lectura {
+            -dispositivo_id: integer
+            -fecha_hora: datetime
+            -dispositivo_codigo: string
+            +dispositivo()
+        }
+    }
+
+    package "Controllers" {
+        class DispositivoController {
+            +index()
+            +store(request: Request)
+            +show(id: integer)
+            +update(request: Request, id: integer)
+            +destroy(id: integer)
+        }
+
+        class LecturaController {
+            -chainOfResponsibility: ChainOfResponsibility
+            +__construct(chainOfResponsibility: ChainOfResponsibility)
+            +store(request: Request)
+            +index()
+            +show(id: integer)
+            +getDiviseData(dispositivo_codigo: string)
+            +getReadsBetweenDate(dispositivo_codigo: string, request: Request)
+            +update(request: Request, id: integer)
+            +destroy(id: integer)
+        }
+    }
+
+    package "Handlers" {
+        class ChainOfResponsibility {
+            -chain: Handler
+            +__construct()
+            +buildChain()
+            +store(request: Request)
+        }
+
+        class Handler {
+            +setNext(handler: Handler): Handler
+            +handle(request: Request)
+        }
+
+        class ValidateNumericHandler {
+            -nextHandler: Handler
+            +setNext(handler: Handler): Handler
+            +handle(request: Request)
+        }
+
+        class CompareReadingHandler {
+            -nextHandler: Handler
+            +setNext(handler: Handler): Handler
+            +handle(request: Request)
+        }
+
+        class StoreHandler {
+            +setNext(handler: Handler): Handler
+            +handle(request: Request)
+        }
+    }
+
+    Dispositivo --|> Lectura : has many
+
+    DispositivoController --> Dispositivo : uses
+    LecturaController --> Lectura : uses
+    LecturaController --> ChainOfResponsibility : uses
+
+    ChainOfResponsibility --> Handler : implements
+    ChainOfResponsibility "1" *-- "0..*" Handler : chain
+    ChainOfResponsibility --> ValidateNumericHandler : uses
+    ChainOfResponsibility --> CompareReadingHandler : uses
+    ChainOfResponsibility --> StoreHandler : uses
+}
+
+@enduml
