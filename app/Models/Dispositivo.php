@@ -17,10 +17,7 @@ class Dispositivo extends Model
         'descripcion',
     ];
 
-    public function usuario()
-    {
-        return $this->belongsTo(Usuario::class, 'id_usuario');
-    }
+
     public function lecturas(){
         $this->hasMany(Lectura::class);
     }
